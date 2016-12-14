@@ -19,6 +19,14 @@ const nextMode = mode => {
   }
 }
 
+// Matchers for retrieving config JSON from terminal
+// Remove ANSI escape code sequences. Visualization: https://goo.gl/IY8vuU
+const ANSI_escape_codes = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/gm
+// Match hyperlayout config string and ignore lints. Visualization: https://goo.gl/hxz4S1
+const config_matcher = /(?:.|\s)*\[hyperlayout config\]:((?:.|\s)*})(?:.|\s)*/gm
+// Cross-os new-line characters. Visualization: https://goo.gl/q501uy
+const newlines = /[\n\r]/gm
+
 // Generate Command queue from converted Config
 function generateQueue(converted, mode = 'TAB', initial) {
   mode = (mode === 'PANE') ? 'HORIZONTAL' : mode
@@ -154,12 +162,6 @@ exports.middleware = store => next => action => {
   const {type, data} = action
   const {sessions} = store.getState()
   const {activeUid} = sessions
-        // Remove ANSI escape code sequences. Visualization: https://goo.gl/IY8vuU
-  const ANSI_escape_codes = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/gm
-        // Match hyperlayout config string and ignore lints. Visualization: https://goo.gl/hxz4S1
-  const config_matcher = /(?:.|\s)*\[hyperlayout config\]:((?:.|\s)*})(?:.|\s)*/gm
-        // Cross-os new-line characters. Visualization: https://goo.gl/q501uy
-  const newlines = /[\n\r]/gm
 
   // Check for hyperlayout config
   if (type === 'SESSION_ADD_DATA') {
