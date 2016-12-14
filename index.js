@@ -154,12 +154,19 @@ exports.middleware = store => next => action => {
   const {type, data} = action
   const {sessions} = store.getState()
   const {activeUid} = sessions
+        // Remove ANSI escape code sequences. Visualization: https://goo.gl/IY8vuU
+  const ANSI_escape_codes = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/gm
+        // Match hyperlayout config string and ignore lints. Visualization: https://goo.gl/hxz4S1
+  const config_matcher = /(?:.|\s)*\[hyperlayout config\]:((?:.|\s)*})(?:.|\s)*/gm
+        // Cross-os new-line characters. Visualization: https://goo.gl/q501uy
+  const newlines = /[\n\r]/gm
 
   // Check for hyperlayout config
   if (type === 'SESSION_ADD_DATA') {
-    const testedData = /^\[hyperlayout config]:(.*)/.exec(data)
+    data = data.replace(ANSI_escape_codes, '')
+    const testedData = config_matcher.exec(data.trim());
     if (testedData && testedData[1]) {
-      const config = JSON.parse(testedData[1])
+      const config = JSON.parse(testedData[1].replace(newlines, ''))
       hyperlayout = new Hyperlayout(config, store)
       return
     }
