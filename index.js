@@ -21,9 +21,9 @@ const nextMode = mode => {
 
 // Matchers for retrieving config JSON from terminal
 // Remove ANSI escape code sequences. Visualization: https://goo.gl/IY8vuU
-const ANSI_escape_codes = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/gm
+const ansiEscapeCodes = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/gm
 // Match hyperlayout config string and ignore lints. Visualization: https://goo.gl/hxz4S1
-const config_matcher = /(?:.|\s)*\[hyperlayout config\]:((?:.|\s)*})(?:.|\s)*/gm
+const configMatcher = /(?:.|\s)*\[hyperlayout config\]:((?:.|\s)*})(?:.|\s)*/gm
 // Cross-os new-line characters. Visualization: https://goo.gl/q501uy
 const newlines = /[\n\r]/gm
 
@@ -165,8 +165,8 @@ exports.middleware = store => next => action => {
 
   // Check for hyperlayout config
   if (type === 'SESSION_ADD_DATA') {
-    data = data.replace(ANSI_escape_codes, '')
-    const testedData = config_matcher.exec(data.trim());
+    data = data.replace(ansiEscapeCodes, '')
+    const testedData = configMatcher.exec(data.trim());
     if (testedData && testedData[1]) {
       const config = JSON.parse(testedData[1].replace(newlines, ''))
       hyperlayout = new Hyperlayout(config, store)
